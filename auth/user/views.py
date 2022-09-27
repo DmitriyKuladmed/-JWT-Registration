@@ -22,7 +22,7 @@ class LoginView(APIView):
         user = User.objects.filter(email=email).first()
 
         if user is None:
-            raise AuthenticationFailed('Пользователь не найдет')
+            raise AuthenticationFailed('Пользователь не найден')
 
         payload = {
             'id': user.id,
@@ -30,7 +30,7 @@ class LoginView(APIView):
             'iat': datetime.datetime.utcnow()
         }
 
-        token = jwt.encode(payload, 'secret', algorithm='HS256').encode('utf-8')
+        token = jwt.encode(payload, 'secret', algorithm='HS256')
 
         response = Response()
         response.set_cookie(key='jwt', value=token, httponly=True)
@@ -56,3 +56,13 @@ class UserView(APIView):
         serializer = UserSerializer(user)
 
         return Response(serializer.data)
+
+class Logout(APIView):
+    def post(self, request):
+        response = Response()
+        response.delete_cookie('jwt')
+        response.data = {
+            'message': 'Успешно'
+        }
+
+        return response
